@@ -1,211 +1,177 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hackeando NASA</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Te amo Abby</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
-      background-color: black;
-      color: limegreen;
-      font-family: "Courier New", Courier, monospace;
+      background: #fff0f5;
+      font-family: 'Segoe Script', cursive;
+      overflow-x: hidden;
+    }
+
+    h1 {
       text-align: center;
-      margin: 0;
-      padding: 0;
-      display: flex;
+      margin: 30px 10px;
+      color: #c71585;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px #ffe6f0;
+    }
+
+    .carousel-item {
+      display: flex !important;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      overflow: hidden;
-      flex-direction: column;
+      transition: opacity 1s ease-in-out;
     }
 
-    #hack-text {
-      font-size: 22px;
-      line-height: 2;
+    .carousel.fade .carousel-item {
+      opacity: 0;
+      transition-property: opacity;
     }
 
-    #random-numbers, #fake-table, #fake-graph {
-      font-size: 16px;
-      margin-top: 20px;
-      white-space: pre-wrap;
+    .carousel.fade .carousel-item.active,
+    .carousel.fade .carousel-item-next.carousel-item-start,
+    .carousel.fade .carousel-item-prev.carousel-item-end {
+      opacity: 1;
+      z-index: 1;
     }
 
-    .loader {
-      border: 4px solid #444;
-      border-radius: 50%;
-      border-top: 4px solid limegreen;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
+    .polaroid {
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      width: 220px;
+      transform: rotate(-1deg);
+      animation: fadeIn 1s ease-in-out;
     }
 
-    .falling-text {
-      display: inline-block;
-      animation: fall 1s forwards;
+    .polaroid img {
+      width: 100%;
+      height: auto;
     }
 
-    .hidden {
-      display: none;
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .petal {
+      position: fixed;
+      top: -50px;
+      width: 20px;
+      height: 20px;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/3459/3459528.png');
+      background-size: cover;
+      opacity: 0.8;
+      animation: fall linear infinite;
+      pointer-events: none;
+      z-index: 999;
     }
 
     @keyframes fall {
-      to { transform: translateY(100vh); opacity: 0; }
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
     }
 
-    #happy-face {
-      font-size: 100px;
-      margin-top: 50px;
-    }
-
-    #final-gif {
-      display: none;
-      margin-top: 20px;
+    @media (max-width: 576px) {
+      .polaroid {
+        width: 80%;
+      }
     }
   </style>
 </head>
 <body>
+  <audio autoplay loop controls>
+  <source src="img/musica.mp3" type="audio/mpeg">
+  Tu navegador no soporta el audio HTML5.
+</audio>
 
-  <div id="hack-text"></div>
-  <div class="loader"></div>
-  <div id="random-numbers"></div>
-  <div id="fake-table"></div>
-  <div id="fake-graph"></div>
-  <div id="happy-face" class="hidden">:)<br>Ya casi está, solo se nos cayó el server...<br>(cargando...)</div>
-  <img id="final-gif" src="https://i.pinimg.com/originals/89/5c/e7/895ce751ba0379700381d17a67086931.gif" alt="Hackeo completado GIF">
+  <h1>Nuestros increibles momentos 💜 📷</h1>
 
+  <div class="container">
+    <div id="carouselRomantico" class="carousel slide carousel-fade" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        <!-- 12 Polaroid Items -->
+        <div class="carousel-item active">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=1" alt="Foto 1"><p>Primer paseo 💕</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=2" alt="Foto 2"><p>Risas eternas 🥰</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=3" alt="Foto 3"><p>Tu mirada 💖</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=4" alt="Foto 4"><p>Momentos mágicos ✨</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=5" alt="Foto 5"><p>Atardecer juntos 🌅</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=6" alt="Foto 6"><p>Tu sonrisa 💫</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=7" alt="Foto 7"><p>Aventura ❤️</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=8" alt="Foto 8"><p>Nuestro lugar 🏞️</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=9" alt="Foto 9"><p>Viaje soñado ✈️</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=10" alt="Foto 10"><p>Noche de estrellas 🌌</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=11" alt="Foto 11"><p>Un beso 🎇</p></div>
+        </div>
+        <div class="carousel-item">
+          <div class="polaroid"><img src="https://picsum.photos/220/280?random=12" alt="Foto 12"><p>Para siempre 💍</p></div>
+        </div>
+      </div>
+
+      <!-- Controles -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselRomantico" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselRomantico" data-bs-slide="next">
+        <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
+        <span class="visually-hidden">Siguiente</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Caída de pétalos -->
   <script>
-    const hackTextElement = document.getElementById("hack-text");
-    const randomNumbersElement = document.getElementById("random-numbers");
-    const fakeTableElement = document.getElementById("fake-table");
-    const fakeGraphElement = document.getElementById("fake-graph");
-    const happyFaceElement = document.getElementById("happy-face");
-    const finalGifElement = document.getElementById("final-gif");
-
-    let percentage = 0;
-    let completed = false;
-
-    // Obtener la fecha actual
-    const now = new Date();
-    const formattedDate = now.toLocaleString();
-
-    // Mensaje inicial con la fecha actual
-    hackTextElement.innerHTML = `Hackeando NASA...<br>Fecha: ${formattedDate}`;
-
-    // Función para actualizar el contador del 1 al 100
-    const updateCounter = () => {
-      percentage++;
-      hackTextElement.innerHTML = `Conectando a servidores NASA...<br> Progreso: ${percentage}%`;
-      
-      if (percentage >= 100) {
-        clearInterval(counterInterval);
-        displayHackerMessages();  // Mostrar mensajes de hacker antes del final
-      }
-    };
-
-    // Función para generar números aleatorios en cascada
-    const displayRandomNumbers = () => {
-      const numbers = [];
-      for (let i = 0; i < 1000; i++) {
-        numbers.push(Math.floor(Math.random() * 100000));
-      }
-
-      let index = 0;
-      const interval = setInterval(() => {
-        if (index >= numbers.length) {
-          clearInterval(interval);
-          displayFakeTable();  // Mostrar tabla de datos después de los números
-        } else {
-          randomNumbersElement.innerHTML += numbers[index] + " ";
-          index++;
-        }
-      }, 5); // Tiempo entre cada número aleatorio
-    };
-
-    // Función para mostrar una tabla de datos ficticios
-    const displayFakeTable = () => {
-      fakeTableElement.innerHTML = `
-        | Servidor   | Estado   | IP            |
-        |------------|----------|---------------|
-        | NASA-001   | Inactivo | 192.168.1.101 |
-        | NASA-002   | Activo   | 192.168.1.102 |
-        | NASA-003   | Encriptando | 192.168.1.103 |
-        | NASA-004   | Vulnerable | 192.168.1.104 |
-      `;
-      displayFakeGraph(); // Después de la tabla, mostrar el gráfico
-    };
-
-    // Función para mostrar gráficos falsos
-    const displayFakeGraph = () => {
-      fakeGraphElement.innerHTML = `
-        Gráfico de datos: ██████████░░░░░░░░░░░░░░░░░░░
-        Hackeos completados: ████████░░░░░░░░
-        Accesos ilegales: ███████████░░░░░░░░░
-      `;
-      startFallingEffect(); // Iniciar el efecto de caída de letras
-    };
-
-    // Función para hacer que las letras caigan
-    const startFallingEffect = () => {
-      const letters = hackTextElement.innerText.split("");
-      hackTextElement.innerHTML = "";
-      letters.forEach((letter, i) => {
-        const span = document.createElement("span");
-        span.classList.add("falling-text");
-        span.style.animationDelay = `${i * 0.05}s`;
-        span.textContent = letter;
-        hackTextElement.appendChild(span);
-      });
-
-      // Después del efecto de caída, mostrar la carita feliz
-      setTimeout(() => {
-        hackTextElement.classList.add("hidden");
-        randomNumbersElement.classList.add("hidden");
-        fakeTableElement.classList.add("hidden");
-        fakeGraphElement.classList.add("hidden");
-        document.querySelector(".loader").style.display = "none"; // Ocultar loader
-        happyFaceElement.classList.remove("hidden");
-        setTimeout(displayFinalGif, 5000); // Esperar 5 segundos antes de mostrar el GIF final
-      }, 2000);
-    };
-
-    // Función para mostrar el GIF final
-    const displayFinalGif = () => {
-      happyFaceElement.classList.add("hidden"); // Ocultar la carita feliz
-      finalGifElement.style.display = "block"; // Mostrar el GIF
-    };
-
-    // Mostrar mensajes estilo hacker y luego pasar a los números aleatorios
-    const displayHackerMessages = () => {
-      const messages = [
-        "Accediendo a la base de datos...",
-        "Inyectando malware...",
-        "Encriptando archivos...",
-        "Redireccionando IP...",
-        "Accediendo a archivos clasificados..."
-      ];
-
-      let index = 0;
-      const interval = setInterval(() => {
-        if (index >= messages.length) {
-          clearInterval(interval);
-          displayRandomNumbers();  // Después de los mensajes, mostrar números aleatorios
-        } else {
-          hackTextElement.innerHTML = messages[index];
-          index++;
-        }
-      }, 2000); // Mostrar un mensaje cada 2 segundos
-    };
-
-    // Iniciar el contador
-    const counterInterval = setInterval(updateCounter, 100); // Actualizar cada 100ms
+    function crearPetalo() {
+      const petal = document.createElement('div');
+      petal.classList.add('petal');
+      petal.style.left = Math.random() * window.innerWidth + 'px';
+      petal.style.animationDuration = (5 + Math.random() * 5) + 's';
+      document.body.appendChild(petal);
+      setTimeout(() => petal.remove(), 10000);
+    }
+    setInterval(crearPetalo, 300);
   </script>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
