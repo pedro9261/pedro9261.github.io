@@ -10,6 +10,9 @@
       background: #fff0f5;
       font-family: 'Segoe Script', cursive;
       overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+      padding-bottom: 90px; /* espacio para el reproductor */
     }
 
     h1 {
@@ -41,18 +44,25 @@
 
     .polaroid {
       background: white;
-      padding: 10px;
+      padding: 18px 18px 12px 18px;
       border: 1px solid #ccc;
       box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
       text-align: center;
-      width: 220px;
+      width: 100%;
+      max-width: 420px;
+      min-width: 220px;
       transform: rotate(-1deg);
       animation: fadeIn 1s ease-in-out;
+      margin: 0 auto;
     }
 
-    .polaroid img {
+    .polaroid img,
+    .polaroid video {
       width: 100%;
       height: auto;
+      border-radius: 8px;
+      object-fit: cover;
+      max-height: 60vh;
     }
 
     @keyframes fadeIn {
@@ -90,58 +100,138 @@
       }
     }
 
+    /* Responsive Polaroid */
     @media (max-width: 576px) {
       .polaroid {
-        width: 80%;
+        max-width: 95vw;
+        min-width: 0;
+        padding: 10px 5px 8px 5px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+    @media (min-width: 577px) and (max-width: 991px) {
+      .polaroid {
+        max-width: 70vw;
+      }
+    }
+    @media (min-width: 992px) {
+      .polaroid {
+        max-width: 520px;
+      }
+    }
+
+    /* Footer Spotify-style player */
+    .audio-footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      background: #0f9e95;
+      color: #fff;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      height: 80px;
+      padding: 0 10px;
+    }
+    .audio-footer .audio-cover {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      margin-right: 16px;
+      background: #222;
+      object-fit: cover;
+    }
+    .audio-footer .audio-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .audio-footer .audio-title {
+      font-size: 1rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .audio-footer .audio-artist {
+      font-size: 0.85rem;
+      color: #b3b3b3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .audio-footer audio {
+      width: 180px;
+      margin-left: 16px;
+      accent-color: #1db954;
+      background: transparent;
+      outline: none;
+      border: none;
+      height: 32px;
+    }
+    @media (max-width: 576px) {
+      .audio-footer {
+        flex-direction: column;
+        height: auto;
+        padding: 8px 2px;
+        text-align: center;
+      }
+      .audio-footer .audio-cover {
+        margin: 0 auto 6px auto;
+      }
+      .audio-footer .audio-info {
+        margin-bottom: 4px;
+      }
+      .audio-footer audio {
+        width: 90vw;
+        margin: 0 auto;
       }
     }
   </style>
 </head>
 <body>
-  <audio autoplay loop controls>
-  <source src="musica.mp3" type="audio/mpeg">
-  Tu navegador no soporta el audio HTML5.
-</audio>
-
   <h1>Nuestros increibles momentos 💜 📷</h1>
 
-  <div class="container">
+  <div class="container py-2">
     <div id="carouselRomantico" class="carousel slide carousel-fade" data-bs-ride="carousel">
-  <div class="carousel-inner">
+      <div class="carousel-inner">
 
-    <!-- Video del concierto -->
-    <div class="carousel-item active">
-      <div class="polaroid">
-        <video width="220" height="280" controls autoplay muted loop>
-          <source src="video.mp4" type="video/mp4">
-          Tu navegador no soporta la etiqueta de video.
-        </video>
-        <p>Concierto de rock 🎸🔥</p>
+        <!-- Video del concierto -->
+        <div class="carousel-item active">
+          <div class="polaroid">
+            <video controls autoplay muted loop>
+              <source src="video.mp4" type="video/mp4">
+              Tu navegador no soporta la etiqueta de video.
+            </video>
+            <p>Concierto de rock 🎸🔥</p>
+          </div>
+        </div>
+
+        <!-- aby.jpg -->
+        <div class="carousel-item">
+          <div class="polaroid"><img src="aby.jpg" alt="Aby"><p>Mi linda novia 💕</p></div>
+        </div>
+
+        <!-- pedro.jpg -->
+        <div class="carousel-item">
+          <div class="polaroid"><img src="pedro.jpg" alt="Pedro"><p>Yo el apuesto 😎</p></div>
+        </div>
+
+        <!-- nosotros.jpg -->
+        <div class="carousel-item">
+          <div class="polaroid"><img src="nosotros.jpg" alt="De viaje"><p>De viaje 🌍</p></div>
+        </div>
+
+        <!-- nosotros_parque.jpg -->
+        <div class="carousel-item">
+          <div class="polaroid"><img src="nosotros_parque.jpg" alt="Vacaciones"><p>Vacaciones en el parque 🌳❤️</p></div>
+        </div>
       </div>
-    </div>
-
-    <!-- aby.jpg -->
-    <div class="carousel-item">
-      <div class="polaroid"><img src="aby.jpg" alt="Aby"><p>Mi linda novia 💕</p></div>
-    </div>
-
-    <!-- pedro.jpg -->
-    <div class="carousel-item">
-      <div class="polaroid"><img src="pedro.jpg" alt="Pedro"><p>Yo el apuesto 😎</p></div>
-    </div>
-
-    <!-- nosotros.jpg -->
-    <div class="carousel-item">
-      <div class="polaroid"><img src="nosotros.jpg" alt="De viaje"><p>De viaje 🌍</p></div>
-    </div>
-
-    <!-- nosotros_parque.jpg -->
-    <div class="carousel-item">
-      <div class="polaroid"><img src="nosotros_parque.jpg" alt="Vacaciones"><p>Vacaciones en el parque 🌳❤️</p></div>
-    </div>
-  </div>
-</div>
-
 
       <!-- Controles -->
       <button class="carousel-control-prev" type="button" data-bs-target="#carouselRomantico" data-bs-slide="prev">
@@ -166,6 +256,73 @@
       setTimeout(() => petal.remove(), 10000);
     }
     setInterval(crearPetalo, 300);
+  </script>
+
+  <!-- Footer estilo Spotify -->
+  <footer class="audio-footer">
+    <img id="audio-cover" src="https://64.media.tumblr.com/fbbb8fd79d84bc484284f8646d947481/tumblr_n5yg7uxb6Y1s94iluo1_500.gif" alt="Cover" class="audio-cover" />
+    <div class="audio-info">
+      <div id="audio-title" class="audio-title">O</div>
+      <div id="audio-artist" class="audio-artist">Coldplay</div>
+    </div>
+    <div class="d-flex align-items-center" style="gap:4px;">
+      <button id="prev-btn" class="btn btn-link text-white p-1" style="font-size:1.2rem;min-width:32px;" aria-label="Anterior">&#9664;</button>
+      <audio id="audio-player" controls style="width:260px;"></audio>
+        <source src="musica.mp3" type="audio/mpeg">
+      </audio>
+      <button id="next-btn" class="btn btn-link text-white p-1" style="font-size:1.2rem;min-width:32px;" aria-label="Siguiente">&#9654;</button>
+    </div>
+  </footer>
+  <script>
+    // Lista de canciones
+    const tracks = [
+      {
+        title: "O",
+        artist: "Coldplay",
+        src: "musica.mp3",
+        cover: "https://64.media.tumblr.com/fbbb8fd79d84bc484284f8646d947481/tumblr_n5yg7uxb6Y1s94iluo1_500.gif"
+      },
+      {
+        title: "Can I Call You Tonight?",
+        artist: "Dayglow",
+        src: "musica2.mpeg",
+        cover: "https://i1.sndcdn.com/artworks-POP3MIt0LOfI-0-t500x500.jpg"
+      }
+    ];
+    let currentTrack = 0;
+
+    const audio = document.getElementById('audio-player');
+    const cover = document.getElementById('audio-cover');
+    const title = document.getElementById('audio-title');
+    const artist = document.getElementById('audio-artist');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    function loadTrack(idx) {
+      const track = tracks[idx];
+      audio.src = track.src;
+      cover.src = track.cover;
+      title.textContent = track.title;
+      artist.textContent = track.artist;
+      audio.load();
+      audio.play();
+    }
+
+    prevBtn.onclick = function() {
+      currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
+      loadTrack(currentTrack);
+    };
+    nextBtn.onclick = function() {
+      currentTrack = (currentTrack + 1) % tracks.length;
+      loadTrack(currentTrack);
+    };
+    audio.onended = function() {
+      currentTrack = (currentTrack + 1) % tracks.length;
+      loadTrack(currentTrack);
+    };
+
+    // Inicializar
+    loadTrack(currentTrack);
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
