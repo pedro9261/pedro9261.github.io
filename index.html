@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrusel Polaroid</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('wallpaper.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        body.letter-locked {
+            overflow: hidden;
+        }
+
+        body.letter-locked {
+            overflow: hidden;
+        }
+
+        /* Efecto overlay en el fondo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.25));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Brillo adicional */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.1), transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Scrollbar personalizado */
+        body::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(139, 69, 19, 0.6), rgba(160, 82, 45, 0.8), rgba(139, 69, 19, 0.6));
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(139, 69, 19, 0.8), rgba(160, 82, 45, 1), rgba(139, 69, 19, 0.8));
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            width: 100%;
+            padding: 40px 20px;
+            transition: opacity 0.45s ease, transform 0.55s ease;
+        }
+
+        body:not(.page-visible) .container {
+            opacity: 0;
+            transform: translateY(18px) scale(0.98);
+        }
+
+        body:not(.page-visible) .avatar {
+            opacity: 0;
+            transform: translateY(18px) scale(0.98);
+            transition: opacity 0.45s ease, transform 0.55s ease;
+        }
+
+        .intro-title {
+            position: relative;
+            z-index: 2;
+            max-width: 980px;
+            margin: 0 auto 18px;
+            padding: 14px 18px;
+            text-align: center;
+            color: #fff7ff;
+            font-size: clamp(1rem, 2.3vw, 1.7rem);
+            line-height: 1.4;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+            background: linear-gradient(180deg, rgba(138, 43, 226, 0.16), rgba(255, 255, 255, 0.03));
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 22px;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .letter-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: #ffffff;
+            transition: opacity 0.55s ease, transform 0.55s ease;
+        }
+
+        .letter-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.01);
+        }
+
+        .letter-card {
+            width: min(92vw, 560px);
+            min-height: 320px;
+            border-radius: 28px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.85s cubic-bezier(0.2, 0.85, 0.25, 1), opacity 0.45s ease;
+            filter: drop-shadow(0 18px 40px rgba(0,0,0,0.35));
+            will-change: transform, opacity;
+        }
+
+        .letter-card.opened {
+            transform: translateY(-12px) scale(1.035);
+        }
+
+        .letter-flap {
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 48%;
+            border-radius: 28px 28px 18px 18px;
+            background: linear-gradient(180deg, rgba(255, 248, 250, 0.96), rgba(236, 212, 226, 0.95));
+            border: 1px solid rgba(255,255,255,0.55);
+            transform-origin: top center;
+            transform: perspective(1200px) rotateX(0deg);
+            transition: transform 0.9s cubic-bezier(0.18, 0.9, 0.22, 1);
+            overflow: hidden;
+        }
+
+        .letter-card.opened .letter-flap {
+            transform: perspective(1200px) rotateX(-172deg) translateY(-10px);
+        }
+
+        .letter-flap::before,
+        .letter-flap::after {
+            content: '';
+            position: absolute;
+            inset: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(138, 43, 226, 0.18);
+        }
+
+        .letter-flap::after {
+            inset: 30px;
+            border-color: rgba(255,255,255,0.35);
+        }
+
+        .letter-body {
+            position: absolute;
+            inset: 18% 10px 10px;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(122, 54, 142, 0.92), rgba(72, 34, 88, 0.9));
+            border: 1px solid rgba(255,255,255,0.18);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px 18px;
+            color: #fff;
+            gap: 10px;
+        }
+
+        .letter-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            opacity: 0.88;
+        }
+
+        .letter-target {
+            font-size: clamp(1.2rem, 4vw, 2.2rem);
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+        }
+
+        .letter-step {
+            min-height: 62px;
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff7ff;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.32);
+            animation: popIn 0.4s ease;
+        }
+
+        .letter-hint {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        .letter-heart {
+            font-size: 2rem;
+            line-height: 1;
+            margin-top: 4px;
+            animation: heartbeat 1.2s ease-in-out infinite;
+        }
+
+        .letter-overlay.opening .letter-card {
+            transform: translateY(-16px) scale(1.01);
+        }
+
+        .letter-overlay.revealing .letter-card {
+            opacity: 0;
+            transform: translateY(-24px) scale(0.95);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .letter-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: #ffffff;
+            transition: opacity 0.55s ease, transform 0.55s ease;
+        }
+
+        .letter-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.01);
+        }
+
+        .letter-card {
+            width: min(92vw, 560px);
+            min-height: 320px;
+            border-radius: 28px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.85s cubic-bezier(0.2, 0.85, 0.25, 1), opacity 0.45s ease;
+            filter: drop-shadow(0 18px 40px rgba(0,0,0,0.35));
+            will-change: transform, opacity;
+        }
+
+        .letter-card.opened {
+            transform: translateY(-12px) scale(1.035);
+        }
+
+        .letter-flap {
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 48%;
+            border-radius: 28px 28px 18px 18px;
+            background: linear-gradient(180deg, rgba(255, 248, 250, 0.96), rgba(236, 212, 226, 0.95));
+            border: 1px solid rgba(255,255,255,0.55);
+            transform-origin: top center;
+            transform: perspective(1200px) rotateX(0deg);
+            transition: transform 0.9s cubic-bezier(0.18, 0.9, 0.22, 1);
+            overflow: hidden;
+        }
+
+        .letter-card.opened .letter-flap {
+            transform: perspective(1200px) rotateX(-172deg) translateY(-10px);
+        }
+
+        .letter-flap::before,
+        .letter-flap::after {
+            content: '';
+            position: absolute;
+            inset: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(138, 43, 226, 0.18);
+        }
+
+        .letter-flap::after {
+            inset: 30px;
+            border-color: rgba(255,255,255,0.35);
+        }
+
+        .letter-body {
+            position: absolute;
+            inset: 18% 10px 10px;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(122, 54, 142, 0.92), rgba(72, 34, 88, 0.9));
+            border: 1px solid rgba(255,255,255,0.18);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px 18px;
+            color: #fff;
+            gap: 10px;
+        }
+
+        .letter-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            opacity: 0.88;
+        }
+
+        .letter-target {
+            font-size: clamp(1.2rem, 4vw, 2.2rem);
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+        }
+
+        .letter-step {
+            min-height: 62px;
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff7ff;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.32);
+            animation: popIn 0.4s ease;
+        }
+
+        .letter-hint {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        .letter-heart {
+            font-size: 2rem;
+            line-height: 1;
+            margin-top: 4px;
+            animation: heartbeat 1.2s ease-in-out infinite;
+        }
+
+        .letter-overlay.opening .letter-card {
+            transform: translateY(-16px) scale(1.01);
+        }
+
+        .letter-overlay.revealing .letter-card {
+            opacity: 0;
+            transform: translateY(-24px) scale(0.95);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        /* Perchero (cuerda principal) */
+        .clothesline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 12px;
+            background: linear-gradient(
+                90deg, 
+                rgba(139, 69, 19, 0.85) 0%,
+                rgba(160, 82, 45, 0.85) 25%,
+                rgba(160, 82, 45, 0.85) 75%,
+                rgba(139, 69, 19, 0.85) 100%
+            );
+            border-radius: 10px;
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.5),
+                inset 0 1px 3px rgba(255, 255, 255, 0.3),
+                inset 0 -1px 3px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+            display: none;
+        }
+
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 50px 40px;
+            padding: 80px 20px 20px;
+            perspective: 1200px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Línea blanca fina que pasa encima de los ganchos */
+        .carousel-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 75px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0),
+                rgba(255, 255, 255, 0.8) 10%,
+                rgba(255, 255, 255, 0.9) 50%,
+                rgba(255, 255, 255, 0.8) 90%,
+                rgba(255, 255, 255, 0)
+            );
+            box-shadow: 
+                0 0 8px rgba(255, 255, 255, 0.6),
+                0 0 15px rgba(255, 255, 255, 0.3);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .polaroid {
+            width: 280px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 
+                0 15px 50px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            overflow: visible;
+            cursor: grab;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: rotateZ(-2deg);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin-top: 60px;
+        }
+
+        /* Cordel/cuerda que cuelga */
+        .polaroid::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 60px;
+            background: linear-gradient(90deg, #8B7355 0%, #A0826D 50%, #8B7355 100%);
+            border-radius: 2px;
+            box-shadow: 
+                inset -1px 0 2px rgba(0, 0, 0, 0.4),
+                0 0 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Gancho en la parte superior */
+        .polaroid::after {
+            content: '';
+            position: absolute;
+            top: -75px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #D4A574 0%, #B8956A 25%, #8B7355 50%, #654321 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -2px 2px 5px rgba(0, 0, 0, 0.5),
+                0 3px 10px rgba(0, 0, 0, 0.6),
+                inset 2px -2px 3px rgba(255, 255, 255, 0.2);
+            border: 1px solid #7A5C3A;
+        }
+
+        .polaroid:nth-child(3n) {
+            transform: rotateZ(-2.5deg);
+        }
+
+        .polaroid:nth-child(4n) {
+            transform: rotateZ(2.2deg);
+        }
+
+        .polaroid:nth-child(5n) {
+            transform: rotateZ(-1.5deg);
+        }
+
+        .polaroid:nth-child(6n) {
+            transform: rotateZ(3deg);
+        }
+
+        .polaroid:nth-child(7n) {
+            transform: rotateZ(-2.8deg);
+        }
+
+        .polaroid:nth-child(8n) {
+            transform: rotateZ(1.2deg);
+        }
+
+        .polaroid:hover {
+            transform: rotateZ(0deg) scale(1.1);
+            box-shadow: 
+                0 25px 70px rgba(0, 0, 0, 0.6),
+                0 0 40px rgba(255, 215, 0, 0.2);
+            z-index: 100;
+            filter: brightness(1.05);
+        }
+
+        .polaroid-image {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .polaroid-text {
+            padding: 20px;
+            height: 70px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 245, 245, 0.95));
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid #f0f0f0;
+            border-radius: 0 0 8px 8px;
+            letter-spacing: 0.5px;
+            font-style: italic;
+        }
+
+        /* Hook (gancho) elegante - REMOVIDO */
+        /* Ya implementado en polaroid::after */
+
+        /* Controles */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 20;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #8B4513;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #8B4513;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: #8B4513;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        .counter {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #8B4513;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 20;
+            display: none;
+        }
+
+        /* Indicador de progreso */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8B4513, #D2691E, #8B4513);
+            display: none;
+            z-index: 15;
+        }
+
+        /* Partículas */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            animation: float-up 8s ease-out forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 1;
+                transform: translateY(0) translateX(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100vh) translateX(var(--drift, 0px)) scale(0.3);
+            }
+        }
+
+        .particle.type-1 {
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle at 30% 30%, #FFFF00, #FFD700, #FFA500);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #FFD700, 0 0 25px rgba(255, 215, 0, 0.6);
+            animation: float-up 6s ease-out forwards;
+        }
+        /* Avatares fijos (desktop) y adaptativos (móvil) */
+        .avatar {
+            position: fixed;
+            width: 280px;
+            height: auto;
+            max-height: 420px;
+            border-radius: 0;
+            object-fit: contain;
+            box-shadow: none; /* sin cuadro ni sombra para integrarse al fondo */
+            z-index: 60;
+            transition: transform .25s ease;
+            pointer-events: none;
+            background: transparent;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+
+        .avatar-left {
+            left: 18px;
+            bottom: 10px;
+            top: auto;
+            transform: none;
+        }
+
+        .avatar-right {
+            right: 18px;
+            bottom: 10px;
+            top: auto;
+            transform: none;
+        }
+
+        .particle.type-2 {
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle at 30% 30%, #FF69B4, #FF1493, #C71585);
+            border-radius: 50%;
+            box-shadow: 0 0 12px #FF69B4, 0 0 20px rgba(255, 105, 180, 0.6);
+            animation: float-up 7s ease-out forwards;
+        }
+
+        .particle.type-3 {
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle at 30% 30%, #87CEEB, #4169E1, #1E90FF);
+            border-radius: 50%;
+            box-shadow: 0 0 10px #87CEEB, 0 0 18px rgba(135, 206, 235, 0.6);
+            animation: float-up 5s ease-out forwards;
+        }
+
+        .particle.type-4 {
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at 30% 30%, #FFB6C1, #FF69B4, #FF1493);
+            border-radius: 50%;
+            box-shadow: 0 0 18px #FFB6C1, 0 0 30px rgba(255, 182, 193, 0.6);
+            animation: float-up 7.5s ease-out forwards;
+        }
+
+        .particle.type-5 {
+            width: var(--heart-size, 18px);
+            height: var(--heart-size, 18px);
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A2BE2' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-7-4.35-9.5-8.58C.62 9.25 1.2 5.9 3.92 4.38c1.94-1.08 4.34-.64 5.97 1.01L12 7.5l2.11-2.11c1.63-1.65 4.03-2.09 5.97-1.01 2.72 1.52 3.3 4.87 1.42 8.04C19 16.65 12 21 12 21z'/%3E%3C/svg%3E");
+            filter: drop-shadow(0 0 8px rgba(138, 43, 226, 0.85)) drop-shadow(0 0 16px rgba(186, 85, 211, 0.35));
+            animation: float-up 8.5s ease-out forwards;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        
+        /* Tablets y pantallas medianas */
+        @media (max-width: 1440px) {
+            .carousel-wrapper {
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 40px 30px;
+                padding: 70px 20px 20px;
+            }
+
+            .carousel-wrapper::before {
+                top: 65px;
+            }
+
+            .polaroid {
+                width: 240px;
+                margin-top: 50px;
+            }
+
+            .polaroid::before {
+                height: 50px;
+                top: -50px;
+            }
+
+            .polaroid::after {
+                top: -65px;
+                width: 18px;
+                height: 18px;
+            }
+
+            .polaroid-image {
+                height: 240px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                padding: 30px 10px;
+            }
+
+            .carousel-wrapper {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 35px 25px;
+                padding: 60px 20px 20px;
+            }
+
+            .carousel-wrapper::before {
+                top: 57px;
+            }
+
+            .polaroid {
+                width: 200px;
+                margin-top: 45px;
+            }
+
+            .polaroid::before {
+                height: 45px;
+                top: -45px;
+                width: 2px;
+            }
+
+            .polaroid::after {
+                top: -60px;
+                width: 16px;
+                height: 16px;
+            }
+
+            .polaroid-image {
+                height: 200px;
+            }
+
+            .polaroid-text {
+                padding: 15px;
+                height: 60px;
+                font-size: 12px;
+            }
+        }
+
+        /* Móviles grandes: cambiar a carrusel de 1 por vista */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px 6px;
+            }
+
+            .container {
+                width: 100%;
+                padding: 10px 6px;
+            }
+
+            /* Transformar grid en carrusel horizontal con snap */
+            .carousel-wrapper {
+                display: flex;
+                flex-direction: row;
+                gap: 18px;
+                padding: 90px 6px 20px;
+                overflow-x: auto;
+                overflow-y: visible;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
+                max-width: 100%;
+            }
+
+            .carousel-wrapper::before {
+                top: 46px;
+            }
+
+            .polaroid {
+                width: calc(86vw);
+                min-width: calc(86vw);
+                aspect-ratio: 3 / 4;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                overflow: hidden;
+                margin: 0 auto;
+                scroll-snap-align: center;
+                margin-top: 40px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+            }
+
+            .polaroid::before {
+                height: 45px;
+                top: -45px;
+                width: 2px;
+            }
+
+            .polaroid::after {
+                top: -62px;
+                width: 16px;
+                height: 16px;
+            }
+
+            .polaroid-image {
+                width: 100%;
+                height: auto;
+                flex: 1 1 auto;
+                object-fit: contain;
+                object-position: center;
+                background: #f7f7f7;
+                border-radius: 6px 6px 0 0;
+                max-height: 75vh;
+                display: block;
+                margin: 0 auto;
+            }
+
+            .polaroid-text {
+                flex: 0 0 auto;
+            }
+
+            .polaroid-text {
+                padding: 16px 14px 18px;
+                min-height: 74px;
+                height: auto;
+                font-size: 12px;
+                line-height: 1.35;
+                letter-spacing: 0.2px;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
+            .particle {
+                animation: float-up 6s ease-out forwards !important;
+            }
+
+            /* Dots indicator */
+            .dots {
+                position: fixed;
+                bottom: 18px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 8px;
+                z-index: 60;
+            }
+
+            .dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.5);
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            }
+
+            .dot.active {
+                background: #fff;
+                width: 12px;
+                height: 12px;
+                box-shadow: 0 4px 10px rgba(255,255,255,0.9);
+            }
+
+            /* Avatar mobile overrides: small side accents */
+            .avatar {
+                width: 52px;
+                height: auto;
+                max-height: 52px;
+                box-shadow: none;
+                opacity: 0.9;
+            }
+
+            .avatar-left {
+                left: auto;
+                right: 10px;
+                top: 110px;
+                transform: none;
+            }
+
+            .avatar-right {
+                left: auto;
+                right: 10px;
+                bottom: 92px;
+                top: auto;
+                transform: none;
+            }
+
+                .avatar-left {
+                    display: none;
+                }
+        }
+
+        /* Móviles medianos */
+        @media (max-width: 600px) {
+            .carousel-wrapper {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 25px 15px;
+                padding: 45px 10px 20px;
+            }
+
+            .carousel-wrapper::before {
+                top: 42px;
+            }
+
+            .polaroid {
+                width: 150px;
+                margin-top: 35px;
+            }
+
+            .polaroid::before {
+                height: 35px;
+                top: -35px;
+                width: 2px;
+            }
+
+            .polaroid::after {
+                top: -50px;
+                width: 12px;
+                height: 12px;
+            }
+
+            .polaroid-image {
+                height: 150px;
+            }
+
+            .polaroid-text {
+                padding: 12px 10px 14px;
+                min-height: 66px;
+                height: auto;
+                font-size: 10px;
+                line-height: 1.3;
+            }
+        }
+
+        /* Móviles pequeños */
+        @media (max-width: 480px) {
+            .carousel-wrapper {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                gap: 20px 12px;
+                padding: 40px 8px 20px;
+            }
+
+            .carousel-wrapper::before {
+                top: 37px;
+            }
+
+            .polaroid {
+                width: 130px;
+                margin-top: 30px;
+            }
+
+            .polaroid::before {
+                height: 30px;
+                top: -30px;
+                width: 2px;
+            }
+
+            .polaroid::after {
+                top: -45px;
+                width: 10px;
+                height: 10px;
+            }
+
+            .polaroid-image {
+                height: 130px;
+            }
+
+            .polaroid-text {
+                padding: 10px 8px 12px;
+                min-height: 60px;
+                height: auto;
+                font-size: 9px;
+                line-height: 1.25;
+            }
+
+            .particle.type-1 {
+                width: 6px;
+                height: 6px;
+            }
+
+            .particle.type-2 {
+                width: 5px;
+                height: 5px;
+            }
+
+            .particle.type-3 {
+                width: 3px;
+                height: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="letter-overlay" id="letterOverlay" role="button" aria-label="Abrir carta">
+        <div class="letter-card" id="letterCard">
+            <div class="letter-flap"></div>
+            <div class="letter-body">
+                <div class="letter-label">De: Pedro Navarro</div>
+                <div class="letter-target">Para: Aby Vasquez ♥</div>
+                <div class="letter-step" id="letterStep">Click para abrir</div>
+                <div class="letter-hint">Toca 3 veces para abrir la carta</div>
+                <div class="letter-heart">♥</div>
+            </div>
+        </div>
+    </div>
+    <img src="avatar_1.png" alt="Avatar 1" class="avatar avatar-left">
+    <img src="avatar_2.png" alt="Avatar 2" class="avatar avatar-right">
+    <div class="container">
+        <div class="intro-title">Espero te anime este detalle amor, te amo mucho, para mi te ves super hermosa, y te lo dire miles de veces si es necesario, mi esposa, mi habyby, mi todo ♥</div>
+
+        <div class="carousel-wrapper">
+            <div class="polaroid" data-index="0">
+                <img src="imagen_1.jpeg" alt="Foto 1" class="polaroid-image">
+                <div class="polaroid-text">De paseo ♥ me encanta tu sonrisa.</div>
+            </div>
+            <div class="polaroid" data-index="1">
+                <img src="imagen_2.jpeg" alt="Foto 2" class="polaroid-image">
+                <div class="polaroid-text">Vamos nena yo te llevo a donde quieras.</div>
+            </div>
+            <div class="polaroid" data-index="2">
+                <img src="imagen_3.jpeg" alt="Foto 3" class="polaroid-image">
+                <div class="polaroid-text">Hacemos una bonita pareja amor, me pregunto como sera nuestra hij@.</div>
+            </div>
+            <div class="polaroid" data-index="3">
+                <img src="imagen_4.jpeg" alt="Foto 4" class="polaroid-image">
+                <div class="polaroid-text">Recuerdas? Coldplay!!!!</div>
+            </div>
+            <div class="polaroid" data-index="4">
+                <img src="imagen_5.jpeg" alt="Foto 5" class="polaroid-image">
+                <div class="polaroid-text">Te amooo ♥</div>
+            </div>
+            <div class="polaroid" data-index="5">
+                <img src="imagen_6.jpeg" alt="Foto 6" class="polaroid-image">
+                <div class="polaroid-text">De veras que si quedamos bonitos</div>
+            </div>
+            <div class="polaroid" data-index="6">
+                <img src="imagen_7.jpeg" alt="Foto 7" class="polaroid-image">
+                <div class="polaroid-text">Que cancion quieres que te toque mi amor? &lt;3</div>
+            </div>
+            <div class="polaroid" data-index="7">
+                <img src="imagen_8.jpeg" alt="Foto 8" class="polaroid-image">
+                <div class="polaroid-text">De viaje &lt;3</div>
+            </div>
+            <div class="polaroid" data-index="8">
+                <img src="imagen_9.jpeg" alt="Foto 9" class="polaroid-image">
+                <div class="polaroid-text">Mi favorita del collage, mira que feliz estoy, todo gracias a ti</div>
+            </div>
+            <div class="polaroid" data-index="9">
+                <img src="imagen_10.jpeg" alt="Foto 10" class="polaroid-image">
+                <div class="polaroid-text">Posando para la foto &lt;3</div>
+            </div>
+            <div class="polaroid" data-index="10">
+                <img src="imagen_11.jpeg" alt="Foto 11" class="polaroid-image">
+                <div class="polaroid-text">Somos un equipo ok? &lt;3 no estas sola ni yo, nos tenemos uno al otro</div>
+            </div>
+            <div class="polaroid" data-index="11">
+                <img src="imagen_12.jpeg" alt="Foto 12" class="polaroid-image">
+                <div class="polaroid-text">Jajjaj ese wey esta jugando silksong, te ves hermosa amor &lt;3</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Particle generation
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            const types = ['type-1', 'type-2', 'type-3', 'type-4'];
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            
+            particle.className = `particle ${randomType}`;
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            const drift = (Math.random() - 0.5) * 200;
+            particle.style.setProperty('--drift', drift + 'px');
+            
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 8000);
+        }
+
+        function createHeartParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle type-5';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+
+            const size = 18 + Math.floor(Math.random() * 34);
+            particle.style.setProperty('--heart-size', size + 'px');
+
+            const drift = (Math.random() - 0.5) * 140;
+            particle.style.setProperty('--drift', drift + 'px');
+
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 9000);
+        }
+
+        // Create particles on hover
+        const polaroids = document.querySelectorAll('.polaroid');
+        
+        polaroids.forEach((polaroid) => {
+            polaroid.addEventListener('mouseenter', (e) => {
+                const rect = polaroid.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                // Crear múltiples partículas
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(() => {
+                        const offsetX = (Math.random() - 0.5) * rect.width;
+                        const offsetY = (Math.random() - 0.5) * rect.height;
+                        createParticle(centerX + offsetX, centerY + offsetY);
+                    }, i * 50);
+                }
+            });
+            
+            polaroid.addEventListener('click', () => {
+                const rect = polaroid.getBoundingClientRect();
+                for (let i = 0; i < 15; i++) {
+                    const offsetX = (Math.random() - 0.5) * 400;
+                    const offsetY = (Math.random() - 0.5) * 400;
+                    createParticle(
+                        rect.left + rect.width / 2 + offsetX,
+                        rect.top + rect.height / 2 + offsetY
+                    );
+                }
+            });
+        });
+
+        // Crear partículas ambientes de forma aleatoria
+        setInterval(() => {
+            const randomX = Math.random() * window.innerWidth;
+            const randomY = Math.random() * window.innerHeight;
+            createParticle(randomX, randomY);
+        }, 3000);
+
+        setInterval(() => {
+            const heartCount = Math.random() < 0.45 ? 2 : 1;
+            for (let i = 0; i < heartCount; i++) {
+                const heartX = Math.random() * window.innerWidth;
+                const heartY = Math.random() * window.innerHeight;
+                createHeartParticle(heartX, heartY);
+            }
+        }, 260);
+
+        // Pequeño arranque de corazones para que se vean desde el inicio
+        setTimeout(() => {
+            const burstCount = 6;
+            for (let i = 0; i < burstCount; i++) {
+                const heartX = Math.random() * window.innerWidth;
+                const heartY = Math.random() * window.innerHeight * 0.75;
+                createHeartParticle(heartX, heartY);
+            }
+        }, 500);
+
+        // Carta interactiva de 3 toques
+        (function(){
+            const overlay = document.getElementById('letterOverlay');
+            const card = document.getElementById('letterCard');
+            const step = document.getElementById('letterStep');
+            if (!overlay || !card || !step) return;
+
+            document.body.classList.add('letter-locked');
+
+            const steps = [
+                'Click para abrir',
+                'Un poco mas fuerte',
+                'Uno mas ahora si'
+            ];
+            let tapCount = 0;
+            let openingTimer = null;
+            let revealTimer = null;
+
+            function updateStep() {
+                step.textContent = steps[Math.min(tapCount, steps.length - 1)];
+                step.animate([
+                    { transform: 'scale(0.96)', opacity: 0.4 },
+                    { transform: 'scale(1)', opacity: 1 }
+                ], { duration: 240, easing: 'ease-out' });
+            }
+
+            function openLetter() {
+                if (openingTimer || revealTimer) return;
+                overlay.classList.add('opening');
+                card.classList.add('opened');
+                step.textContent = 'Abriendo...';
+                openingTimer = setTimeout(() => {
+                    document.body.classList.add('page-visible');
+                    overlay.classList.add('revealing');
+                }, 780);
+
+                revealTimer = setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('opening', 'revealing');
+                    document.body.classList.remove('letter-locked');
+                    openingTimer = null;
+                    revealTimer = null;
+                }, 1260);
+            }
+
+            function handlePress(event) {
+                event.preventDefault();
+                if (overlay.classList.contains('hidden')) return;
+                tapCount += 1;
+                if (tapCount >= 3) {
+                    openLetter();
+                    return;
+                }
+                updateStep();
+            }
+
+            overlay.addEventListener('pointerup', handlePress);
+            updateStep();
+        })();
+
+        /* ===== Mobile carousel controls: dots + snapping sync ===== */
+        (function(){
+            const wrapper = document.querySelector('.carousel-wrapper');
+            if (!wrapper) return;
+            const items = Array.from(wrapper.querySelectorAll('.polaroid'));
+
+            // Sólo activar en pantallas pequeñas
+            function isMobileView() { return window.matchMedia('(max-width: 768px)').matches; }
+
+            let dotsContainer = document.createElement('div');
+            dotsContainer.className = 'dots';
+            document.body.appendChild(dotsContainer);
+
+            items.forEach((it, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (i===0? ' active':'');
+                dot.dataset.index = i;
+                dot.addEventListener('click', () => {
+                    it.scrollIntoView({behavior: 'smooth', inline: 'center'});
+                });
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = Array.from(dotsContainer.children);
+
+            function updateActiveDot(){
+                if (!isMobileView()){
+                    dotsContainer.style.display = 'none';
+                    return;
+                }
+                dotsContainer.style.display = 'flex';
+                const center = window.innerWidth/2;
+                let closest = 0;
+                let bestDiff = Infinity;
+                items.forEach((it, idx) => {
+                    const r = it.getBoundingClientRect();
+                    const itemCenter = r.left + r.width/2;
+                    const diff = Math.abs(itemCenter - center);
+                    if (diff < bestDiff) { bestDiff = diff; closest = idx; }
+                });
+                dots.forEach(d => d.classList.remove('active'));
+                if (dots[closest]) dots[closest].classList.add('active');
+            }
+
+            let scrollTimeout;
+            wrapper.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                updateActiveDot();
+                // snap correction after user stops
+                scrollTimeout = setTimeout(() => {
+                    if (!isMobileView()) return;
+                    // find active item and center it
+                    const activeDot = document.querySelector('.dot.active');
+                    const idx = Array.from(dots).indexOf(activeDot);
+                    if (idx >= 0) items[idx].scrollIntoView({behavior: 'smooth', inline: 'center'});
+                }, 150);
+            }, {passive: true});
+
+            // Update on resize
+            window.addEventListener('resize', () => {
+                updateActiveDot();
+            });
+
+            // Initialize
+            setTimeout(updateActiveDot, 200);
+        })();
+    </script>
+</body>
+</html>
